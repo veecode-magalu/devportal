@@ -1,0 +1,84 @@
+replicas: 1
+image:
+  repository: andrevtg/devportal-bundle
+  tag: magalu
+  pullPolicy: Always
+  #pullPolicy: IfNotPresent
+
+environment: development
+
+ingress:
+  enabled: true
+  host: devportal.localdomain
+  className: kong
+  annotations:
+    konghq.com/https-redirect-status-code: "308"
+    konghq.com/preserve-host: "true"
+    konghq.com/protocols: "https"
+    konghq.com/strip-path: "false"
+  #tls:
+  #  secretName: devportal-secret
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+appConfig:
+  title: Devportal
+  app:
+    baseUrl: https://devportal.localdomain
+  backend:
+    baseUrl: https://devportal.localdomain
+  database:
+    client: better-sqlite3
+    #connection: ':memory:'
+
+auth:
+  providers:
+    github:
+      clientId: <github-client-id>
+      clientSecret: <github-client-secret>
+
+integrations:
+  github:
+    host: github.com
+    apiBaseUrl: https://api.github.com/
+    token: <github-token>
+
+catalog:
+  providers:
+    github:
+      organization: veecode-magalu # string
+      catalogPath: /catalog-info.yaml # string
+      filters:
+        branch: main # Optional. Uses `master` as default
+        #repository: catalog #suggestion devportal-catalog
+        validateLocationsExist: true
+      # organization: veecode-magalu # string
+      # catalogPath: /catalog-info.yaml # string
+      # filters:
+      #   branch: main # Optional. Uses `master` as default
+      #   #repository: catalog #suggestion devportal-catalog
+      #   validateLocationsExist: true
+  locations:
+    - type: url
+      target: https://github.com/veecode-magalu/catalog/blob/main/catalog-info.yaml
+
+platform:
+  guest:
+    enabled: true
+  apiManagement:
+    enabled: false
+    readOnlyMode: false
+
+permission:
+  enabled: true
+  # rbac:
+  #   admin:
+  #     defaultAdminRoleEnabled: true
+  #     superUsers:
+  #       - name: user:default/guest
